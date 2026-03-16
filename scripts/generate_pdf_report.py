@@ -875,6 +875,18 @@ if __name__ == "__main__":
         input_path = sys.argv[1]
         output_file = sys.argv[2] if len(sys.argv) > 2 else "GEO-REPORT.pdf"
 
+        # Path sanitization: resolve to absolute path and block traversal
+        if input_path != "-":
+            input_path = os.path.realpath(input_path)
+            if not os.path.isfile(input_path):
+                print(f"ERROR: Input file does not exist: {input_path}")
+                sys.exit(1)
+
+        output_file = os.path.realpath(output_file)
+        if ".." in os.path.relpath(output_file):
+            print("ERROR: Output path must not contain directory traversal")
+            sys.exit(1)
+
         if input_path == "-":
             data = json.loads(sys.stdin.read())
         else:

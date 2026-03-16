@@ -250,13 +250,13 @@ def analyze_page_citability(url: str) -> dict:
         response = requests.get(
             url,
             headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                "User-Agent": "GeoSEO-Audit/1.0 (+https://github.com/peterpiperpicked4/geo-seo-claude)"
             },
             timeout=30,
         )
         response.raise_for_status()
     except Exception as e:
-        return {"error": f"Failed to fetch page: {str(e)}"}
+        return {"error": f"Failed to fetch page: {type(e).__name__}"}
 
     soup = BeautifulSoup(response.text, "lxml")
 

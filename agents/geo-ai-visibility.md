@@ -114,13 +114,13 @@ Search for the brand/site name across platforms frequently cited by AI models:
    - **FIRST**, run the Wikipedia API directly via Bash to check definitively:
      ```bash
      python3 -c "
-     import requests; from urllib.parse import quote_plus
-     brand='[BRAND_NAME]'
-     r=requests.get(f'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={quote_plus(brand)}&format=json', headers={'User-Agent':'GEO-Audit/1.0'}, timeout=15)
+     import sys, requests; from urllib.parse import quote_plus
+     brand=sys.argv[1]
+     r=requests.get(f'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={quote_plus(brand)}&format=json', headers={'User-Agent':'GeoSEO-Audit/1.0'}, timeout=15)
      results=r.json().get('query',{}).get('search',[])
      if results and brand.lower() in results[0].get('title','').lower(): print(f'FOUND: https://en.wikipedia.org/wiki/{results[0][\"title\"].replace(\" \",\"_\")}')
      else: print('NOT FOUND')
-     "
+     " "[BRAND_NAME]"
      ```
    - **SECOND**, try WebFetch on `https://en.wikipedia.org/wiki/[Brand_Name]` directly to verify.
    - **DO NOT** rely solely on web search (`site:wikipedia.org`) — it frequently returns false negatives.

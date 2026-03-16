@@ -12,6 +12,7 @@ Extended: /llms-full.txt (detailed version)
 import sys
 import json
 import re
+import time
 from urllib.parse import urljoin, urlparse
 
 try:
@@ -22,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "User-Agent": "GeoSEO-Audit/1.0 (+https://github.com/peterpiperpicked4/geo-seo-claude)",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
@@ -114,7 +115,7 @@ def validate_llmstxt(url: str) -> dict:
         else:
             result["issues"].append(f"llms.txt returned status {response.status_code}")
     except Exception as e:
-        result["issues"].append(f"Error fetching llms.txt: {str(e)}")
+        result["issues"].append(f"Error fetching llms.txt: {type(e).__name__}")
 
     # Check llms-full.txt
     try:
@@ -144,7 +145,7 @@ def generate_llmstxt(url: str, max_pages: int = 30) -> dict:
         response = requests.get(url, headers=DEFAULT_HEADERS, timeout=30)
         soup = BeautifulSoup(response.text, "lxml")
     except Exception as e:
-        result["error"] = f"Failed to fetch homepage: {str(e)}"
+        result["error"] = f"Failed to fetch homepage: {type(e).__name__}"
         return result
 
     # Extract site name and description
@@ -244,6 +245,7 @@ def generate_llmstxt(url: str, max_pages: int = 30) -> dict:
             for page in section_pages:
                 # Try to fetch page description
                 try:
+                    time.sleep(1)  # Rate limit between requests
                     page_resp = requests.get(page["url"], headers=DEFAULT_HEADERS, timeout=10)
                     page_soup = BeautifulSoup(page_resp.text, "lxml")
                     page_meta = page_soup.find("meta", attrs={"name": "description"})

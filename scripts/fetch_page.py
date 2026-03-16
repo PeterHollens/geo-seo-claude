@@ -7,6 +7,7 @@ Extracts HTML, text content, meta tags, headers, and structured data.
 import sys
 import json
 import re
+import time
 from urllib.parse import urljoin, urlparse
 from typing import Optional
 
@@ -27,7 +28,7 @@ AI_CRAWLERS = {
 }
 
 DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "User-Agent": "GeoSEO-Audit/1.0 (+https://github.com/peterpiperpicked4/geo-seo-claude)",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
     "Accept-Encoding": "gzip, deflate",
@@ -173,10 +174,10 @@ def fetch_page(url: str, timeout: int = 30) -> dict:
 
     except requests.exceptions.Timeout:
         result["errors"].append(f"Timeout after {timeout} seconds")
-    except requests.exceptions.ConnectionError as e:
-        result["errors"].append(f"Connection error: {str(e)}")
+    except requests.exceptions.ConnectionError:
+        result["errors"].append("Connection error: unable to reach the target URL")
     except Exception as e:
-        result["errors"].append(f"Unexpected error: {str(e)}")
+        result["errors"].append(f"Unexpected error: {type(e).__name__}")
 
     return result
 
@@ -284,7 +285,7 @@ def fetch_robots_txt(url: str, timeout: int = 15) -> dict:
             )
 
     except Exception as e:
-        result["errors"].append(f"Error fetching robots.txt: {str(e)}")
+        result["errors"].append(f"Error fetching robots.txt: {type(e).__name__}")
 
     return result
 
@@ -310,7 +311,7 @@ def fetch_llms_txt(url: str, timeout: int = 15) -> dict:
                 result[key]["exists"] = True
                 result[key]["content"] = response.text
         except Exception as e:
-            result["errors"].append(f"Error checking {check_url}: {str(e)}")
+            result["errors"].append(f"Error checking {check_url}: {type(e).__name__}")
 
     return result
 
@@ -389,7 +390,9 @@ def crawl_sitemap(url: str, max_pages: int = 50, timeout: int = 15) -> list:
 
     discovered_pages = set()
 
-    for sitemap_url in sitemap_urls:
+    for i, sitemap_url in enumerate(sitemap_urls):
+        if i > 0:
+            time.sleep(1)  # Rate limit between requests
         try:
             response = requests.get(
                 sitemap_url, headers=DEFAULT_HEADERS, timeout=timeout
@@ -403,6 +406,7 @@ def crawl_sitemap(url: str, max_pages: int = 50, timeout: int = 15) -> list:
                     if loc:
                         # Fetch child sitemap
                         try:
+                            time.sleep(1)  # Rate limit between requests
                             child_resp = requests.get(
                                 loc.text.strip(),
                                 headers=DEFAULT_HEADERS,

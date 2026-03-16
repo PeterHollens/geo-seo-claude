@@ -6,7 +6,7 @@ set -euo pipefail
 # Installs the GEO-first SEO analysis tool for Claude Code
 # ============================================================
 
-REPO_URL="https://github.com/zubair-trabzada/geo-seo-claude.git"
+REPO_URL="https://github.com/peterpiperpicked4/geo-seo-claude.git"
 CLAUDE_DIR="${HOME}/.claude"
 SKILLS_DIR="${CLAUDE_DIR}/skills"
 AGENTS_DIR="${CLAUDE_DIR}/agents"
